@@ -9,9 +9,6 @@ import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart'
 
 class ReviewPage extends StatefulWidget {
   final Api _api = Api();
-  final Movie _movie;
-
-  ReviewPage(this._movie);
 
   @override
   _ReviewPageState createState() => _ReviewPageState();
@@ -19,13 +16,25 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   final TextEditingController _reviewCommentController = TextEditingController();
+  int _itemNum;
+  Timer _timer;
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    this._timer.cancel();
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    final Movie _movie = ModalRoute.of(context).settings.arguments;
+    this._setAutoRefresh(_movie.id);
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget._movie.title,
+          _movie.title,
         ),
 
         leading: IconButton(
@@ -38,10 +47,11 @@ class _ReviewPageState extends State<ReviewPage> {
       ),
 
       body: FutureBuilder(
-        future: widget._api.getReviews(widget._movie.id),
+        future: widget._api.getReviews(_movie.id),
         builder: (BuildContext context, AsyncSnapshot<List<Review>> asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.done) {
             if (asyncSnapshot.hasData) {
+              this._itemNum = asyncSnapshot.data.length;
               return RefreshIndicator(
                 onRefresh: this._onRefresh,
                 child: ListView.builder(
@@ -111,7 +121,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
         tooltip: 'Add Review',
 
-        onPressed: this._onAddReview,
+        onPressed: () => this._onAddReview(_movie),
       ),
     );
   }
@@ -124,11 +134,25 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
+  void _setAutoRefresh(int movieId) {
+    this._timer = Timer(
+      Duration(
+        seconds: 15,
+      ),
+
+      () async {
+        if (this._itemNum != (await widget._api.getReviews(movieId)).length) {
+        setState(() {});
+        }
+      },
+    );
+  }
+
   void _onBack() {
     Navigator.of(context).pop();
   }
 
-  void _onAddReview() {
+  void _onAddReview(Movie _movie) {
     double rate = 0.0;
     showDialog(
         context: context,
@@ -218,7 +242,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
                 onPressed: () async {
                   await widget._api.addReview(
-                      widget._movie.id,
+                      _movie.id,
                       rate.toInt(),
                       comment: this._reviewCommentController.text
                   );

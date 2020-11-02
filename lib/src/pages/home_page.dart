@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:movie_rater/src/models/movie.dart';
-import 'package:movie_rater/src/pages/review_page.dart';
 import 'package:movie_rater/src/services/api.dart';
 import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart';
 
@@ -15,6 +16,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _movieTitleController = TextEditingController();
+  int _itemNum = 0;
+  Timer _timer;
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    this._timer.cancel();
+  }
 
 
   @override
@@ -37,6 +47,7 @@ class _HomePageState extends State<HomePage> {
         builder: (BuildContext ctx, AsyncSnapshot<List<Movie>> asyncSnapShot) {
           if (asyncSnapShot.connectionState == ConnectionState.done) {
             if (asyncSnapShot.hasData) {
+              this._itemNum = asyncSnapShot.data.length;
               return RefreshIndicator(
                 onRefresh: this._onRefresh,
                 child: ListView.builder(
@@ -108,18 +119,32 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  void _openSettingPage() {
-    Navigator.pushNamed(this.context, '/setting');
+  void _setAutoRefresh() {
+    this._timer = Timer(
+      Duration(
+        seconds: 15,
+      ),
+
+      () async {
+        if (this._itemNum != (await widget.api.getMovies()).length) {
+          setState(() {});
+        }
+      },
+    );
+  }
+
+
+  void _openSettingPage() async {
+    this._timer.cancel();
+    await Navigator.of(context).pushNamed('/setting');
+    this._setAutoRefresh();
+    setState(() {});
   }
 
   void _openMovieReview(Movie movie) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (_) {
-            return ReviewPage(movie);
-          }
-      ),
-    );
+    this._timer.cancel();
+    await Navigator.of(context).pushNamed('/review', arguments: movie);
+    this._setAutoRefresh();
     setState(() {});
   }
 

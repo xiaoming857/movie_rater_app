@@ -73,7 +73,7 @@ class SettingPage extends StatelessWidget {
 
 
   void _onSignOut(BuildContext context, Auth auth) async {
-    Navigator.of(context).pop();
     await auth.logout();
+    Navigator.of(context).pop();
   }
 }

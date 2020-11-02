@@ -18,9 +18,9 @@ void main() {
 
       initialRoute: '/',
       routes: {
-        '/home': (context) => MyApp(),
+        '/main': (context) => MyApp(),
         '/setting': (context) => SettingPage(),
-        // '/review': (context) => ReviewPage(),
+        '/review': (context) => ReviewPage(),
       },
     ),
   );
