@@ -1,31 +1,16 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:movie_rater/services/auth.dart';
-
-class SettingPage extends StatefulWidget {
-  final Auth auth = Auth();
-
-  @override
-  _SettingPageState createState() => _SettingPageState();
-}
-
-class _SettingPageState extends State<SettingPage> {
-  void _onBack() {
-    Navigator.of(context).pop(false);
-  }
+import 'package:movie_rater/src/services/auth.dart';
 
 
-  void _onSignOut() async {
-    await widget.auth.logout();
-    Navigator.of(context).pop(true);
-  }
+class SettingPage extends StatelessWidget {
+  final Auth _auth = Auth();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Profile'
+            'Profile'
         ),
 
         leading: IconButton(
@@ -33,7 +18,7 @@ class _SettingPageState extends State<SettingPage> {
             Icons.arrow_back,
           ),
 
-          onPressed: _onBack,
+          onPressed: () => _onBack(context),
         ),
       ),
 
@@ -44,7 +29,7 @@ class _SettingPageState extends State<SettingPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              widget.auth.currentUser.username,
+              this._auth.user.username,
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -57,10 +42,10 @@ class _SettingPageState extends State<SettingPage> {
             ),
 
             Text(
-              widget.auth.currentUser.email,
+              this._auth.user.email,
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87
+                  fontSize: 16,
+                  color: Colors.black87
               ),
             ),
 
@@ -73,11 +58,22 @@ class _SettingPageState extends State<SettingPage> {
                 'Sign Out',
               ),
 
-              onPressed: _onSignOut,
+              onPressed: () => _onSignOut(context, this._auth),
             ),
           ],
         ),
       ),
     );
+  }
+
+
+  void _onBack(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+
+  void _onSignOut(BuildContext context, Auth auth) async {
+    Navigator.of(context).pop();
+    await auth.logout();
   }
 }

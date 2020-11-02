@@ -1,49 +1,30 @@
-import "package:flutter/material.dart";
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:movie_rater/src/my_app.dart';
+import 'package:movie_rater/src/pages/review_page.dart';
+import 'package:movie_rater/src/pages/setting_page.dart';
+import 'package:movie_rater/src/services/auth.dart';
 
-import 'package:movie_rater/services/auth.dart';
-import 'package:movie_rater/pages/sign_in_page.dart';
-import 'package:movie_rater/pages/home_page.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MaterialApp(
-    title: "Movie Rater",
-    home: MyApp(),
-  ));
-}
+  runApp(
+    MaterialApp(
+      title: 'Movie Rater',
+      home: ChangeNotifierProvider<Auth>(
+        create: (BuildContext context) => Auth(),
+        child: MyApp(),
+      ),
 
-class MyApp extends StatefulWidget {
-  final Auth auth = Auth();
-
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  void refresh() {
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: widget.auth.isLoggedIn(),
-      builder: (BuildContext ctx, AsyncSnapshot snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (!snapshot.data) {
-              return SignInPage(refresh);
-          }
-
-          return HomePage(refresh);
-        }
-
-        return Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+      initialRoute: '/',
+      routes: {
+        '/home': (context) => MyApp(),
+        '/setting': (context) => SettingPage(),
+        // '/review': (context) => ReviewPage(),
       },
-    );
-  }
+    ),
+  );
 }
+
+
+
