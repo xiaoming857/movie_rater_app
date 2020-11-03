@@ -110,7 +110,7 @@ class Auth with ChangeNotifier {
     }
   }
 
-  Future<void> logout() {
+  Future<void> logout() async {
     this._user = User.empty();
     this._loginDataStorage.clearAll();
     notifyListeners();

@@ -9,6 +9,9 @@ import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart'
 
 class ReviewPage extends StatefulWidget {
   final Api _api = Api();
+  final Movie _movie;
+
+  ReviewPage(this._movie);
 
   @override
   _ReviewPageState createState() => _ReviewPageState();
@@ -16,9 +19,14 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   final TextEditingController _reviewCommentController = TextEditingController();
-  int _itemNum;
   Timer _timer;
+  int _itemNum;
 
+  @override
+  void initState() {
+    super.initState();
+    this._setAutoRefresh(widget._movie.id);
+  }
 
   @override
   void dispose() {
@@ -26,15 +34,12 @@ class _ReviewPageState extends State<ReviewPage> {
     this._timer.cancel();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final Movie _movie = ModalRoute.of(context).settings.arguments;
-    this._setAutoRefresh(_movie.id);
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _movie.title,
+          widget._movie.title,
         ),
 
         leading: IconButton(
@@ -47,7 +52,7 @@ class _ReviewPageState extends State<ReviewPage> {
       ),
 
       body: FutureBuilder(
-        future: widget._api.getReviews(_movie.id),
+        future: widget._api.getReviews(widget._movie.id),
         builder: (BuildContext context, AsyncSnapshot<List<Review>> asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.done) {
             if (asyncSnapshot.hasData) {
@@ -55,50 +60,50 @@ class _ReviewPageState extends State<ReviewPage> {
               return RefreshIndicator(
                 onRefresh: this._onRefresh,
                 child: ListView.builder(
-                    physics: AlwaysScrollableScrollPhysics
-                      (parent: BouncingScrollPhysics()
-                    ),
+                  physics: AlwaysScrollableScrollPhysics (
+                    parent: BouncingScrollPhysics(),
+                  ),
 
-                    itemCount: asyncSnapshot.data.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        child: ListTile(
-                          title: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  asyncSnapshot.data[index].username,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87
-                                  ),
+                  itemCount: asyncSnapshot.data.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Card(
+                      child: ListTile(
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                asyncSnapshot.data[index].username,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87
                                 ),
                               ),
-
-                              RatingBarIndicator(
-                                itemCount: 5,
-                                itemSize: 20,
-                                rating: asyncSnapshot.data[index].rating.toDouble(),
-                                itemBuilder: (BuildContext ctx, int index) {
-                                  return Icon(
-                                    Icons.star,
-                                    color: Colors.amberAccent,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-
-                          subtitle: Text(
-                            asyncSnapshot.data[index].comment,
-                            softWrap: true,
-                            style: TextStyle(
-                                color: Colors.black87
                             ),
+
+                            RatingBarIndicator(
+                              itemCount: 5,
+                              itemSize: 20,
+                              rating: asyncSnapshot.data[index].rating.toDouble(),
+                              itemBuilder: (BuildContext ctx, int index) {
+                                return Icon(
+                                  Icons.star,
+                                  color: Colors.amberAccent,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        subtitle: Text(
+                          asyncSnapshot.data[index].comment,
+                          softWrap: true,
+                          style: TextStyle(
+                              color: Colors.black87
                           ),
                         ),
-                      );
-                    }
+                      ),
+                    );
+                  }
                 ),
               );
             }
@@ -121,7 +126,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
         tooltip: 'Add Review',
 
-        onPressed: () => this._onAddReview(_movie),
+        onPressed: () => this._onAddReview(widget._movie),
       ),
     );
   }
@@ -135,16 +140,16 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   void _setAutoRefresh(int movieId) {
-    this._timer = Timer(
+    this._timer = Timer.periodic(
       Duration(
         seconds: 15,
       ),
 
-      () async {
+      (Timer timer) async {
         if (this._itemNum != (await widget._api.getReviews(movieId)).length) {
-        setState(() {});
+          setState(() {});
         }
-      },
+      }
     );
   }
 

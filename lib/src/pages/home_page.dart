@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:movie_rater/src/models/movie.dart';
 import 'package:movie_rater/src/services/api.dart';
 import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart';
+import 'package:movie_rater/src/pages/review_page.dart';
 
 
 class HomePage extends StatefulWidget {
-  final Api api = Api();
+  final Api _api = Api();
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -16,9 +17,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _movieTitleController = TextEditingController();
-  int _itemNum = 0;
   Timer _timer;
+  int _itemNum;
 
+  @override
+  void initState() {
+    super.initState();
+    this._setAutoRefresh();
+  }
 
   @override
   void dispose() {
@@ -26,12 +32,11 @@ class _HomePageState extends State<HomePage> {
     this._timer.cancel();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page"),
+        title: Text("Movie Rater"),
         actions: [
           IconButton(
             icon: Icon(
@@ -43,7 +48,7 @@ class _HomePageState extends State<HomePage> {
       ),
 
       body: FutureBuilder(
-        future: widget.api.getMovies(),
+        future: widget._api.getMovies(),
         builder: (BuildContext ctx, AsyncSnapshot<List<Movie>> asyncSnapShot) {
           if (asyncSnapShot.connectionState == ConnectionState.done) {
             if (asyncSnapShot.hasData) {
@@ -112,24 +117,24 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onRefresh() {
     return Future(
-            () {
-          setState(() {});
-        }
+      () {
+        setState(() {});
+      }
     );
   }
 
 
   void _setAutoRefresh() {
-    this._timer = Timer(
+    this._timer = Timer.periodic(
       Duration(
         seconds: 15,
       ),
 
-      () async {
-        if (this._itemNum != (await widget.api.getMovies()).length) {
+      (Timer timer) async {
+        if (this._itemNum != (await widget._api.getMovies()).length) {
           setState(() {});
         }
-      },
+      }
     );
   }
 
@@ -137,15 +142,23 @@ class _HomePageState extends State<HomePage> {
   void _openSettingPage() async {
     this._timer.cancel();
     await Navigator.of(context).pushNamed('/setting');
-    this._setAutoRefresh();
     setState(() {});
+    this._setAutoRefresh();
   }
 
   void _openMovieReview(Movie movie) async {
     this._timer.cancel();
-    await Navigator.of(context).pushNamed('/review', arguments: movie);
-    this._setAutoRefresh();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        maintainState: false,
+        builder: (_) {
+          return ReviewPage(movie);
+        }
+      )
+    );
+
     setState(() {});
+    this._setAutoRefresh();
   }
 
   void _onAddMovie() {
@@ -199,7 +212,7 @@ class _HomePageState extends State<HomePage> {
 
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
-                    await widget.api.addMovie(this._movieTitleController.text);
+                    await widget._api.addMovie(this._movieTitleController.text);
                     this._movieTitleController.clear();
                     setState(() {});
                     Navigator.of(context).pop();
