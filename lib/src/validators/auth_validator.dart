@@ -22,4 +22,14 @@ class AuthValidator {
       return null;
     }
   }
+
+  String validateUsername(String username) {
+    if (username == null || username.isEmpty) {
+      return 'Username is empty';
+    } else if (username.length < 3) {
+      return 'Username is too short (min 3 characters)';
+    }
+
+    return null;
+  }
 }

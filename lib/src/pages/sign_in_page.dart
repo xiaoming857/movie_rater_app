@@ -20,15 +20,6 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
   bool _hidePassword = true;
   bool _isLoading = false;
 
-  void _onLogin () async {
-    setState(() {this._hasFirstSubmit = true;});
-
-    if (this._formKey.currentState.validate()) {
-      setState(() {this._isLoading = !this._isLoading;});
-      await widget.auth.login(this._emailController.text, this._passwordController.text);
-      setState(() {this._isLoading = !this._isLoading;});
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +99,7 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
 
                                 Form(
                                   key: this._formKey,
+                                  autovalidate: this._hasFirstSubmit,
                                   child: Column(
                                     children: [
                                       SizedBox(
@@ -116,18 +108,16 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
                                           controller: this._emailController,
                                           validator: validateEmail,
                                           textInputAction: TextInputAction.next,
-                                          autovalidate: this._hasFirstSubmit,
                                           style: TextStyle(
-                                              fontSize: _textFieldFontSize
+                                              fontSize: this._textFieldFontSize
                                           ),
 
                                           decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.only(top: this._textFieldFontSize),
+                                            hintText: 'Email',
                                             prefixIcon: Icon(
                                               Icons.email,
                                             ),
-
-                                            contentPadding: EdgeInsets.only(top: _textFieldFontSize),
-                                            hintText: 'Email',
                                           ),
 
                                           onFieldSubmitted: (String value) {
@@ -145,12 +135,13 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
                                           validator: validatePassword,
                                           focusNode: this._passwordFocus,
                                           obscureText: this._hidePassword,
-                                          autovalidate: this._hasFirstSubmit,
                                           style: TextStyle(
-                                            fontSize: _textFieldFontSize,
+                                            fontSize: this._textFieldFontSize,
                                           ),
 
                                           decoration: InputDecoration(
+                                            contentPadding: EdgeInsets.only(top: this._textFieldFontSize),
+                                            hintText: 'Password',
                                             prefixIcon: Icon(
                                               Icons.lock,
                                             ),
@@ -166,9 +157,6 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
                                                 });
                                               },
                                             ),
-
-                                            contentPadding: EdgeInsets.only(top: _textFieldFontSize),
-                                            hintText: 'Password',
                                           ),
 
                                           onFieldSubmitted: (String value) => this._onLogin(),
@@ -178,21 +166,39 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
                                   ),
                                 ),
 
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width / 2,
-                                  child: RaisedButton(
-                                    color: Colors.blueAccent,
-                                    textTheme: ButtonTextTheme.primary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
+
+                                Column(
+                                  children: [
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width / 2,
+                                      child: RaisedButton(
+                                        color: Colors.blueAccent,
+                                        textTheme: ButtonTextTheme.primary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+
+                                        child: Text(
+                                          'Login',
+                                        ),
+
+                                        onPressed: this._onLogin,
+                                      ),
                                     ),
 
-                                    child: Text(
-                                      'Login',
+
+                                    SizedBox(
+                                      height: 10,
                                     ),
 
-                                    onPressed: this._onLogin,
-                                  ),
+
+                                    InkWell(
+                                      child: Text(
+                                        'or create a new account',
+                                      ),
+                                      onTap: _openSignUpPage,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -219,5 +225,20 @@ class _SignInPageState extends State<SignInPage> with AuthValidator{
         ),
       ),
     );
+  }
+
+
+  void _onLogin () async {
+    setState(() {this._hasFirstSubmit = true;});
+    if (this._formKey.currentState.validate()) {
+      setState(() {this._isLoading = !this._isLoading;});
+      await widget.auth.login(this._emailController.text, this._passwordController.text);
+      setState(() {this._isLoading = !this._isLoading;});
+    }
+  }
+
+
+  void _openSignUpPage () async {
+    await Navigator.of(context).pushNamed('/signUp');
   }
 }

@@ -17,10 +17,12 @@ class Auth with ChangeNotifier {
   Auth._instance();
 
 
-  final String baseUrl = 'http://10.0.2.2:8080';
+  //http://10.0.2.2:8080
+  final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com';
   final String _prefix = 'Bearer ';
   final LoginDataStorage _loginDataStorage = LoginDataStorage();
   User _user;
+
 
   User get user => _user;
   String get prefix => _prefix;
@@ -28,7 +30,6 @@ class Auth with ChangeNotifier {
 
   Future<User> refresh() async {
     String url = this.baseUrl + '/refresh';
-
     try {
       Map<String, dynamic> storedData = await this._loginDataStorage.retrieve();
       if (storedData.isEmpty) {
@@ -54,6 +55,7 @@ class Auth with ChangeNotifier {
           }
       );
 
+
       Map<String, dynamic> result = json.decode(response.body);
       if (response.statusCode == 200) {
         this._user.updateTokens(result);
@@ -77,9 +79,9 @@ class Auth with ChangeNotifier {
     return this._user;
   }
 
+
   Future<void> login(String email, String password) async {
     String url = this.baseUrl + '/login';
-
     try {
       http.Response response = await http.post(
         url,
@@ -109,6 +111,41 @@ class Auth with ChangeNotifier {
       debugPrint('LOGIN EXCEPTION: ' + e.toString());
     }
   }
+
+
+  Future<void> register([String username, String email, String password]) async {
+    String url = this.baseUrl + '/register';
+    try {
+      var response = await http.post(
+          url,
+          body: {
+            "username": username,
+            "email": email,
+            "password": password,
+          }
+      ).timeout(
+          Duration(seconds: 15),
+          onTimeout: () {
+            throw TimeoutException(
+              'Can not establish connection to server!',
+              Duration(seconds: 15),
+            );
+          }
+      );
+
+      Map<String, dynamic> result = json.decode(response.body);
+      if (response.statusCode == 200) {
+        this._user = User.fromMap(result);
+        this._loginDataStorage.store(result);
+        notifyListeners();
+      } else {
+        debugPrint('LOGIN ERROR: ' + result.toString());
+      }
+    } catch (e) {
+      debugPrint('LOGIN EXCEPTION: ' + e.toString());
+    }
+  }
+
 
   Future<void> logout() async {
     this._user = User.empty();
