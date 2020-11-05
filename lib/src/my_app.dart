@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
             if (asyncSnapshot.connectionState == ConnectionState.none) {
               return Container();
             } else if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-              return LoadingPage();
+              return LoadingPage('Retrieving Data');
             } else {
               if (asyncSnapshot.hasData) {
                 // debugPrint('MYAPP: ' + asyncSnapshot.data.toString());
