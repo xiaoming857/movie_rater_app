@@ -47,8 +47,6 @@ class Api {
             }
           });
         }
-
-
       } else if (response.statusCode == 401) {
         User user = await this._auth.refresh();
         if (user != null) {
@@ -138,6 +136,8 @@ class Api {
           if (user != null) {
             reviews = await this.getReviews(movieId);
           }
+        } else {
+          debugPrint('GETREVIEWS ERROR: ' + json.decode(response.body).toString());
         }
       } on TimeoutException catch (e) {
         debugPrint('GETREVIEW: ' + e.toString());
