@@ -5,15 +5,14 @@ class CustomCircularProgressIndicator extends StatelessWidget {
   final String label;
 
   CustomCircularProgressIndicator(
-      {
-        @required this.label,
-      }
-      ): assert(label != null);
+    {
+      @required this.label,
+    }
+  ): assert(label != null);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withAlpha(150),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
