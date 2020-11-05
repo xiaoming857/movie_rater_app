@@ -3,6 +3,10 @@ import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart'
 
 
 class LoadingPage extends StatelessWidget {
+  final String message;
+
+  LoadingPage(this.message);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,7 +17,7 @@ class LoadingPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CustomCircularProgressIndicator(
-                label: 'Loading User',
+                label: this.message,
               ),
             ],
           ),

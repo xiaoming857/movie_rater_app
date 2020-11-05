@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:movie_rater/src/models/movie.dart';
+import 'package:movie_rater/src/popup_dialogs/add_movie_dialog.dart';
 import 'package:movie_rater/src/services/api.dart';
 import 'package:movie_rater/src/widgets/custom_circular_progress_indicator.dart';
 import 'package:movie_rater/src/pages/review_page.dart';
@@ -15,8 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _movieTitleController = TextEditingController();
   Timer _timer;
   int _itemNum;
 
@@ -30,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     super.dispose();
     this._timer.cancel();
+    this._timer = null;
   }
 
   @override
@@ -51,47 +51,50 @@ class _HomePageState extends State<HomePage> {
         future: widget._api.getMovies(),
         builder: (BuildContext ctx, AsyncSnapshot<List<Movie>> asyncSnapShot) {
           if (asyncSnapShot.connectionState == ConnectionState.done) {
-            if (asyncSnapShot.hasData) {
+            if (asyncSnapShot.hasData && asyncSnapShot.data.isNotEmpty) {
               this._itemNum = asyncSnapShot.data.length;
               return RefreshIndicator(
                 onRefresh: this._onRefresh,
                 child: ListView.builder(
-                    physics: AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
+                  physics: AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
 
-                    itemCount: asyncSnapShot.data.length,
-                    itemBuilder: (BuildContext ctx, int index) {
-
-                      return Card(
-                        child: ListTile(
-                          title: Text(
-                            asyncSnapShot.data[index].title,
-                          ),
-
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                asyncSnapShot.data[index].avgRating.toString(),
-                              ),
-
-                              Icon(
-                                Icons.star,
-                                color: Colors.amberAccent,
-                              ),
-                            ],
-                          ),
-
-                          onTap: () => this._openMovieReview(asyncSnapShot.data[index]),
+                  itemCount: asyncSnapShot.data.length,
+                  itemBuilder: (BuildContext ctx, int index) {
+                    return Card(
+                      child: ListTile(
+                        title: Text(
+                          asyncSnapShot.data[index].title,
                         ),
-                      );
-                    }
+
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              asyncSnapShot.data[index].avgRating.toString(),
+                            ),
+
+                            Icon(
+                              Icons.star,
+                              color: Colors.amberAccent,
+                            ),
+                          ],
+                        ),
+
+                        onTap: () => this._openMovieReview(asyncSnapShot.data[index]),
+                      ),
+                    );
+                  }
                 ),
               );
             }
 
-            return Container();
+            return Center(
+              child: Text(
+                'No Data'
+              ),
+            );
           }
 
           return Center(
@@ -163,65 +166,11 @@ class _HomePageState extends State<HomePage> {
 
   void _onAddMovie() {
     showDialog(
-        context: this.context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-              'Add movie',
-            ),
-
-            content: Form(
-              key: this._formKey,
-              child: TextFormField(
-                controller: this._movieTitleController,
-                autofocus: true,
-                validator: (String value) {
-                  if (value.isEmpty) {
-                    return 'Title is empty';
-                  } else if (value.length < 3) {
-                    return 'Title is too short (min 3 characters)';
-                  }
-
-                  return null;
-                },
-
-                decoration: InputDecoration(
-                  hintText: 'Title',
-                ),
-              ),
-            ),
-
-            actions: [
-              InkWell(
-                child: Text(
-                  'cancel',
-                ),
-
-                onTap: () {
-                  this._movieTitleController.clear();
-                  Navigator.of(context).pop();
-                },
-              ),
-
-              RaisedButton(
-                color: Colors.blueAccent,
-
-                child: Text(
-                  'Add',
-                ),
-
-                onPressed: () async {
-                  if (_formKey.currentState.validate()) {
-                    await widget._api.addMovie(this._movieTitleController.text);
-                    this._movieTitleController.clear();
-                    setState(() {});
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ],
-          );
-        }
+      barrierDismissible: false,
+      context: this.context,
+      builder: (BuildContext context) {
+        return AddMovieDialog();
+      }
     );
   }
 }
