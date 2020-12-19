@@ -18,7 +18,7 @@ class Auth with ChangeNotifier {
 
 
   //http://10.0.2.2:8080
-  final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com';
+  final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com/api';
   final String _prefix = 'Bearer ';
   final LoginDataStorage _loginDataStorage = LoginDataStorage();
   User _user;
