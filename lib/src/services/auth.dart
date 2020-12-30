@@ -17,8 +17,8 @@ class Auth with ChangeNotifier {
   Auth._instance();
 
 
-  //http://10.0.2.2:8080
-  final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com/api';
+  final String baseUrl = 'http://10.0.2.2:8080/api';
+  // final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com/api';
   final String _prefix = 'Bearer ';
   final LoginDataStorage _loginDataStorage = LoginDataStorage();
   User _user;
@@ -139,10 +139,10 @@ class Auth with ChangeNotifier {
         this._loginDataStorage.store(result);
         notifyListeners();
       } else {
-        debugPrint('LOGIN ERROR: ' + result.toString());
+        debugPrint('REGISTER ERROR: ' + result.toString());
       }
     } catch (e) {
-      debugPrint('LOGIN EXCEPTION: ' + e.toString());
+      debugPrint('REGISTER EXCEPTION: ' + e.toString());
     }
   }
 
