@@ -17,8 +17,8 @@ class Auth with ChangeNotifier {
   Auth._instance();
 
 
-  final String baseUrl = 'http://10.0.2.2:8080/api';
-  // final String baseUrl = 'https://guarded-badlands-33322.herokuapp.com/api';
+  // final String baseUrl = 'http://10.0.2.2:8080/api';
+  final String baseUrl = 'https://test.crazyming.xyz/api';
   final String _prefix = 'Bearer ';
   final LoginDataStorage _loginDataStorage = LoginDataStorage();
   User _user;
