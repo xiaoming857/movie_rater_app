@@ -164,13 +164,15 @@ class _ReviewPageState extends State<ReviewPage> {
     Navigator.of(context).pop();
   }
 
-  void _onAddReview(Movie _movie) {
-    showDialog(
+  void _onAddReview(Movie _movie) async {
+    await showDialog(
       barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return AddReviewDialog(_movie.id);
       }
     );
+
+    setState(() {});
   }
 }

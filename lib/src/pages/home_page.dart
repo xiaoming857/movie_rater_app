@@ -164,14 +164,16 @@ class _HomePageState extends State<HomePage> {
     this._setAutoRefresh();
   }
 
-  void _onAddMovie() {
-    showDialog(
+  void _onAddMovie() async {
+    await showDialog(
       barrierDismissible: false,
       context: this.context,
       builder: (BuildContext context) {
         return AddMovieDialog();
       }
     );
+
+    setState(() {});
   }
 }
 
